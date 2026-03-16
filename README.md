@@ -4,7 +4,7 @@ A full-stack web application where users can browse dentists, book appointments,
 
 ## Live Demo
 
-Deployed on Render: *(add your Render URL here after deployment)*
+Deployed on Render: _(add your Render URL here after deployment)_
 
 ## Project Structure
 
@@ -154,10 +154,10 @@ Both models include automatic timestamps. Data is stored in `backend/database.sq
 
 This project is configured for one-click deployment on [Render](https://render.com):
 
-| Setting       | Value              |
-| ------------- | ------------------ |
+| Setting       | Value                  |
+| ------------- | ---------------------- |
 | Build Command | `npm run render-build` |
-| Start Command | `npm start`        |
+| Start Command | `npm start`            |
 
 The Express server serves both the API and the built React frontend in production.
 

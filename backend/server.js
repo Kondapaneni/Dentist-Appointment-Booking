@@ -66,7 +66,7 @@ sequelize
   .then(async () => {
     console.log("✅ SQLite database synced");
     await autoSeed();
-    app.listen(PORT, () => {
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server is running on http://localhost:${PORT}`);
     });
   })
