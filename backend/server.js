@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -34,6 +35,13 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Serve frontend build in production
+const frontendPath = path.join(__dirname, "..", "dist");
+app.use(express.static(frontendPath));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -42,11 +50,22 @@ app.use((err, req, res, next) => {
     .json({ error: "Something went wrong!", message: err.message });
 });
 
+// Auto-seed dentists if the table is empty
+async function autoSeed() {
+  const count = await Dentist.count();
+  if (count === 0) {
+    const sampleDentists = require("./seedData");
+    await Dentist.bulkCreate(sampleDentists);
+    console.log("✅ Auto-seeded dentist data");
+  }
+}
+
 // Sync database and start server
 sequelize
   .sync()
-  .then(() => {
+  .then(async () => {
     console.log("✅ SQLite database synced");
+    await autoSeed();
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on http://localhost:${PORT}`);
     });
