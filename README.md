@@ -1,15 +1,20 @@
 # Dentist Appointment Booking Platform
 
-This is a full-stack web application where users can browse dentists, book appointments, and admins can manage all bookings from a dashboard. Built with the MERN stack (MongoDB, Express, React, Node.js).
+A full-stack web application where users can browse dentists, book appointments, and admins can manage all bookings from a dashboard. Built with React, Express, and SQLite.
+
+## Live Demo
+
+Deployed on Render: *(add your Render URL here after deployment)*
 
 ## Project Structure
 
 ```
 dentist-appointment/
 ├── backend/
-│   ├── server.js
-│   ├── seed.js
-│   ├── .env
+│   ├── server.js          # Express server + serves frontend in production
+│   ├── database.js        # Sequelize SQLite connection
+│   ├── seed.js            # Manual database seeder
+│   ├── seedData.js        # Sample dentist data (auto-seeds on first run)
 │   ├── package.json
 │   ├── models/
 │   │   ├── Dentist.js
@@ -41,20 +46,21 @@ dentist-appointment/
 
 **Frontend:** React 18, React Router, Axios, Tailwind CSS, Lucide React, Vite
 
-**Backend:** Node.js, Express.js, MongoDB, Mongoose, CORS, dotenv
+**Backend:** Node.js, Express.js, SQLite, Sequelize, CORS, dotenv
 
 ## Prerequisites
 
 - Node.js (v16+)
-- MongoDB (running locally or a connection string to a hosted instance)
+
+No external database server required — SQLite stores data in a local file.
 
 ## Getting Started
 
 ### 1. Clone and install
 
 ```bash
-git clone <repository-url>
-cd dentist-appointment
+git clone https://github.com/Kondapaneni/Dentist-Appointment-Booking.git
+cd Dentist-Appointment-Booking
 
 # Install frontend dependencies
 npm install
@@ -65,25 +71,16 @@ npm install
 cd ..
 ```
 
-### 2. Configure environment
+### 2. Seed the database (optional)
 
-Create `backend/.env`:
-
-```
-MONGODB_URI=mongodb://localhost:27017/dentistAppointments
-PORT=5000
-```
-
-### 3. Seed the database (optional)
-
-This populates the database with 6 sample dentists so you have data to work with right away.
+The server auto-seeds 6 sample dentists on first run. To manually seed:
 
 ```bash
 cd backend
 npm run seed
 ```
 
-### 4. Run the app
+### 3. Run the app
 
 Open two terminals:
 
@@ -126,31 +123,15 @@ The frontend runs on `http://localhost:5173` and the backend on `http://localhos
 
 ### Example — booking an appointment
 
-```
+```json
 POST /api/appointments
-Content-Type: application/json
 
 {
-  "_id": {
-    "$oid": "69b7c9286baa39bb0bfcc8c5"
-  },
-  "dentist_id": {
-    "$oid": "69b7c4692f636a2d132307f1"
-  },
+  "dentist_id": 1,
   "patient_name": "Gowtham",
   "age": 22,
   "gender": "Male",
-  "appointment_date": {
-    "$date": "2026-03-17T00:00:00.000Z"
-  },
-  "status": "Confirmed",
-  "createdAt": {
-    "$date": "2026-03-16T09:11:04.779Z"
-  },
-  "updatedAt": {
-    "$date": "2026-03-16T09:11:04.779Z"
-  },
-  "__v": 0
+  "appointment_date": "2026-03-17T00:00:00.000Z"
 }
 ```
 
@@ -160,7 +141,7 @@ Content-Type: application/json
 
 **Appointment** — dentist_id (references Dentist), patient_name, age (1–120), gender (Male/Female/Other), appointment_date, status (Pending/Confirmed/Completed/Cancelled)
 
-Both models include automatic timestamps.
+Both models include automatic timestamps. Data is stored in `backend/database.sqlite`.
 
 ## How It Works
 
@@ -169,25 +150,40 @@ Both models include automatic timestamps.
 - After booking, you get a confirmation screen and are redirected back to the dentist list.
 - The admin panel at `/admin` shows a table of every appointment with patient details, the dentist name, clinic name, and status.
 
+## Deployment (Render)
+
+This project is configured for one-click deployment on [Render](https://render.com):
+
+| Setting       | Value              |
+| ------------- | ------------------ |
+| Build Command | `npm run render-build` |
+| Start Command | `npm start`        |
+
+The Express server serves both the API and the built React frontend in production.
+
 ## Available Scripts
 
 ```bash
 # Frontend
-npm run dev        # Start dev server
-npm run build      # Production build
-npm run preview    # Preview the build
-npm run lint       # Lint the code
+npm run dev          # Start Vite dev server
+npm run build        # Production build
+npm run preview      # Preview the build
+npm run lint         # Lint the code
 
 # Backend (run from /backend)
-npm start          # Start the server
-npm run dev        # Start with auto-reload (nodemon)
-npm run seed       # Seed sample dentists
+npm start            # Start the server
+npm run dev          # Start with auto-reload (nodemon)
+npm run seed         # Seed sample dentists
+
+# Deployment
+npm run render-build # Install deps + build frontend
+npm start            # Start production server
 ```
 
 ## Troubleshooting
 
-**MongoDB won't connect** — Make sure `mongod` is running and the connection string in `backend/.env` is correct.
+**Dentists not showing** — Run `cd backend && node seed.js` to seed the database manually, or just restart the server (it auto-seeds on first run).
 
-**CORS errors** — The backend already has CORS enabled. Double-check that the frontend is hitting `http://localhost:5000/api`.
+**CORS errors** — The backend has CORS enabled. In production, the frontend is served from the same origin so CORS is not an issue.
 
-**Port conflict** — Change the port in `backend/.env` or kill the process using it.
+**Port conflict** — Set `PORT` in `backend/.env` or kill the process using port 5000.
