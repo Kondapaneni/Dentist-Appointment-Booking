@@ -1,25 +1,20 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+
+const sequelize = require("./database");
+const Dentist = require("./models/Dentist");
+const Appointment = require("./models/Appointment");
+
+// Set up associations
+Dentist.hasMany(Appointment, { foreignKey: "dentist_id" });
+Appointment.belongsTo(Dentist, { foreignKey: "dentist_id" });
 
 const dentistRoutes = require("./routes/dentistRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// MongoDB Connection
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/dentistAppointments";
-
-mongoose
-  .connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Middleware
 app.use(cors());
@@ -35,8 +30,7 @@ app.get("/api/health", (req, res) => {
   res.json({
     status: "OK",
     message: "Server is running",
-    database:
-      mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+    database: "SQLite Connected",
   });
 });
 
@@ -48,8 +42,17 @@ app.use((err, req, res, next) => {
     .json({ error: "Something went wrong!", message: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+// Sync database and start server
+sequelize
+  .sync()
+  .then(() => {
+    console.log("✅ SQLite database synced");
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Database sync error:", err);
+  });
 
 module.exports = app;

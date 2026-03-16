@@ -1,13 +1,19 @@
 const express = require("express");
+const { Op } = require("sequelize");
 const router = express.Router();
 const Appointment = require("../models/Appointment");
+const Dentist = require("../models/Dentist");
 
 // GET all appointments
 router.get("/", async (req, res) => {
   try {
-    const appointments = await Appointment.find()
-      .populate("dentist_id", "name email specialty clinic_name")
-      .sort({ appointment_date: 1 });
+    const appointments = await Appointment.findAll({
+      include: {
+        model: Dentist,
+        attributes: ["name", "email", "specialty", "clinic_name"],
+      },
+      order: [["appointment_date", "ASC"]],
+    });
     res.json(appointments);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -17,10 +23,12 @@ router.get("/", async (req, res) => {
 // GET appointment by ID
 router.get("/:id", async (req, res) => {
   try {
-    const appointment = await Appointment.findById(req.params.id).populate(
-      "dentist_id",
-      "name email specialty clinic_name",
-    );
+    const appointment = await Appointment.findByPk(req.params.id, {
+      include: {
+        model: Dentist,
+        attributes: ["name", "email", "specialty", "clinic_name"],
+      },
+    });
     if (!appointment) {
       return res.status(404).json({ error: "Appointment not found" });
     }
@@ -33,9 +41,10 @@ router.get("/:id", async (req, res) => {
 // GET appointments by dentist ID
 router.get("/dentist/:dentistId", async (req, res) => {
   try {
-    const appointments = await Appointment.find({
-      dentist_id: req.params.dentistId,
-    }).sort({ appointment_date: 1 });
+    const appointments = await Appointment.findAll({
+      where: { dentist_id: req.params.dentistId },
+      order: [["appointment_date", "ASC"]],
+    });
     res.json(appointments);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -45,11 +54,13 @@ router.get("/dentist/:dentistId", async (req, res) => {
 // POST create new appointment
 router.post("/", async (req, res) => {
   try {
-    const appointment = new Appointment(req.body);
-    await appointment.save();
-    const populatedAppointment = await Appointment.findById(
-      appointment._id,
-    ).populate("dentist_id", "name email specialty clinic_name");
+    const appointment = await Appointment.create(req.body);
+    const populatedAppointment = await Appointment.findByPk(appointment.id, {
+      include: {
+        model: Dentist,
+        attributes: ["name", "email", "specialty", "clinic_name"],
+      },
+    });
     res.status(201).json(populatedAppointment);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -61,9 +72,11 @@ router.post("/check-availability", async (req, res) => {
   try {
     const { dentistId, appointmentDate } = req.body;
     const existingAppointment = await Appointment.findOne({
-      dentist_id: dentistId,
-      appointment_date: appointmentDate,
-      status: { $in: ["Confirmed", "Pending"] },
+      where: {
+        dentist_id: dentistId,
+        appointment_date: appointmentDate,
+        status: { [Op.in]: ["Confirmed", "Pending"] },
+      },
     });
     res.json({ available: !existingAppointment });
   } catch (error) {
@@ -74,15 +87,18 @@ router.post("/check-availability", async (req, res) => {
 // PUT update appointment
 router.put("/:id", async (req, res) => {
   try {
-    const appointment = await Appointment.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true },
-    ).populate("dentist_id", "name email specialty clinic_name");
+    const appointment = await Appointment.findByPk(req.params.id);
     if (!appointment) {
       return res.status(404).json({ error: "Appointment not found" });
     }
-    res.json(appointment);
+    await appointment.update(req.body);
+    const updated = await Appointment.findByPk(req.params.id, {
+      include: {
+        model: Dentist,
+        attributes: ["name", "email", "specialty", "clinic_name"],
+      },
+    });
+    res.json(updated);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -91,10 +107,11 @@ router.put("/:id", async (req, res) => {
 // DELETE appointment
 router.delete("/:id", async (req, res) => {
   try {
-    const appointment = await Appointment.findByIdAndDelete(req.params.id);
+    const appointment = await Appointment.findByPk(req.params.id);
     if (!appointment) {
       return res.status(404).json({ error: "Appointment not found" });
     }
+    await appointment.destroy();
     res.status(204).send();
   } catch (error) {
     res.status(400).json({ error: error.message });

@@ -1,43 +1,56 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../database");
 
-const appointmentSchema = new mongoose.Schema(
+const Appointment = sequelize.define(
+  "Appointment",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     dentist_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Dentist",
-      required: true,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Dentists",
+        key: "id",
+      },
     },
     patient_name: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     age: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 120,
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 120,
+      },
     },
     gender: {
-      type: String,
-      required: true,
-      enum: ["Male", "Female", "Other"],
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isIn: [["Male", "Female", "Other"]],
+      },
     },
     appointment_date: {
-      type: Date,
-      required: true,
+      type: DataTypes.DATE,
+      allowNull: false,
     },
     status: {
-      type: String,
-      enum: ["Pending", "Confirmed", "Completed", "Cancelled"],
-      default: "Confirmed",
+      type: DataTypes.STRING,
+      defaultValue: "Confirmed",
+      validate: {
+        isIn: [["Pending", "Confirmed", "Completed", "Cancelled"]],
+      },
     },
   },
   {
     timestamps: true,
   },
 );
-
-const Appointment = mongoose.model("Appointment", appointmentSchema);
 
 module.exports = Appointment;

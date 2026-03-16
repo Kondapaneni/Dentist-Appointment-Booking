@@ -5,7 +5,7 @@ const Dentist = require("../models/Dentist");
 // GET all dentists
 router.get("/", async (req, res) => {
   try {
-    const dentists = await Dentist.find().sort({ name: 1 });
+    const dentists = await Dentist.findAll({ order: [["name", "ASC"]] });
     res.json(dentists);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
 // GET dentist by ID
 router.get("/:id", async (req, res) => {
   try {
-    const dentist = await Dentist.findById(req.params.id);
+    const dentist = await Dentist.findByPk(req.params.id);
     if (!dentist) {
       return res.status(404).json({ error: "Dentist not found" });
     }
@@ -28,8 +28,7 @@ router.get("/:id", async (req, res) => {
 // POST create new dentist
 router.post("/", async (req, res) => {
   try {
-    const dentist = new Dentist(req.body);
-    await dentist.save();
+    const dentist = await Dentist.create(req.body);
     res.status(201).json(dentist);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -39,13 +38,11 @@ router.post("/", async (req, res) => {
 // PUT update dentist
 router.put("/:id", async (req, res) => {
   try {
-    const dentist = await Dentist.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const dentist = await Dentist.findByPk(req.params.id);
     if (!dentist) {
       return res.status(404).json({ error: "Dentist not found" });
     }
+    await dentist.update(req.body);
     res.json(dentist);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -55,10 +52,11 @@ router.put("/:id", async (req, res) => {
 // DELETE dentist
 router.delete("/:id", async (req, res) => {
   try {
-    const dentist = await Dentist.findByIdAndDelete(req.params.id);
+    const dentist = await Dentist.findByPk(req.params.id);
     if (!dentist) {
       return res.status(404).json({ error: "Dentist not found" });
     }
+    await dentist.destroy();
     res.status(204).send();
   } catch (error) {
     res.status(400).json({ error: error.message });

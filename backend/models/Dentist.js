@@ -1,53 +1,55 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../database");
 
-const dentistSchema = new mongoose.Schema(
+const Dentist = sequelize.define(
+  "Dentist",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     name: {
-      type: String,
-      required: true,
-      trim: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
       unique: true,
-      lowercase: true,
-      trim: true,
     },
     specialty: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     qualification: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     experience: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     clinic_name: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     address: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     location: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     photo_url: {
-      type: String,
-      default: "https://via.placeholder.com/300",
+      type: DataTypes.STRING,
+      defaultValue: "https://via.placeholder.com/300",
     },
   },
   {
     timestamps: true,
   },
 );
-
-const Dentist = mongoose.model("Dentist", dentistSchema);
 
 module.exports = Dentist;

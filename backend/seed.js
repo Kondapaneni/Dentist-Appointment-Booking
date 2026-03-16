@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const sequelize = require("./database");
 const Dentist = require("./models/Dentist");
 require("dotenv").config();
 
@@ -73,23 +73,12 @@ const sampleDentists = [
 
 async function seedDatabase() {
   try {
-    // Connect to MongoDB
-    const MONGODB_URI =
-      process.env.MONGODB_URI ||
-      "mongodb://localhost:27017/dentistAppointments";
-    await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    console.log("✅ Connected to MongoDB");
-
-    // Clear existing dentists
-    await Dentist.deleteMany({});
-    console.log("🗑️  Cleared existing dentists");
+    // Sync database (create tables)
+    await sequelize.sync({ force: true });
+    console.log("✅ SQLite database synced");
 
     // Insert sample dentists
-    const insertedDentists = await Dentist.insertMany(sampleDentists);
+    const insertedDentists = await Dentist.bulkCreate(sampleDentists);
     console.log(`✅ Inserted ${insertedDentists.length} sample dentists`);
 
     console.log("\n📋 Sample Dentists:");
@@ -103,8 +92,7 @@ async function seedDatabase() {
   } catch (error) {
     console.error("❌ Error seeding database:", error);
   } finally {
-    // Close the connection
-    await mongoose.connection.close();
+    await sequelize.close();
     console.log("\n👋 Connection closed");
   }
 }

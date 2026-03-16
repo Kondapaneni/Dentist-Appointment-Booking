@@ -70,7 +70,7 @@ export default function DentistList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {dentists.map((dentist) => (
             <DentistCard
-              key={dentist._id}
+              key={dentist.id}
               dentist={dentist}
               onBookAppointment={handleBookAppointment}
             />

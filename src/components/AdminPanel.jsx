@@ -142,7 +142,7 @@ export default function AdminPanel() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {appointments.map((appointment) => (
                     <tr
-                      key={appointment._id}
+                      key={appointment.id}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -160,10 +160,10 @@ export default function AdminPanel() {
                         {formatDate(appointment.appointment_date)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {appointment.dentist_id?.name || "N/A"}
+                        {appointment.Dentist?.name || "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {appointment.dentist_id?.clinic_name || "N/A"}
+                        {appointment.Dentist?.clinic_name || "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">

@@ -38,7 +38,7 @@ export default function DentistCard({ dentist, onBookAppointment }) {
         </div>
 
         <button
-          onClick={() => onBookAppointment(dentist._id)}
+          onClick={() => onBookAppointment(dentist.id)}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200"
         >
           Book Appointment
